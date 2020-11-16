@@ -173,14 +173,14 @@ void delkey(struct hash_table *t, char *k)
    unsigned int idx;
    struct bucket *curr, *tag;
 
-   if (t->k == t->n/4)
+   if (strlen(search(t, k)) == 0) /* already doesn't exist */
+      return;
+
+   if (t->k <= t->n/4)
       *t = shrink(t);
    
    idx = hash(k) % t->n;
    
-   if (t->buckets[idx] == (struct bucket *) NULL)
-      return;
-
    if (strcmp(t->buckets[idx]->key, k) == 0) {
       tag = t->buckets[idx];
       t->buckets[idx] = t->buckets[idx]->next;
@@ -210,20 +210,22 @@ void delkey(struct hash_table *t, char *k)
 
 void write_table(const struct hash_table *t, FILE *fp)
 {
-   int i;
+   int i, buflen;
    char record[80];
    struct bucket *curr;
 
    for (i = 0; i < t->n; ++i) {
       curr = t->buckets[i];
-      if (curr) {
-         while (curr) {
-            memset(record, 0, sizeof(record));
-            memcpy(record, curr->key, strlen(curr->key)+1);
-            memcpy(record+strlen(record)+1, curr->value, strlen(curr->value)+1);
-            fwrite(record, sizeof(record), 1, fp);
-            curr = curr->next;
-         }
+      while (curr) {
+         memset(record, 0, sizeof(record));
+         memcpy(record, curr->key, strlen(curr->key));
+         if (strlen(record)+1+strlen(curr->value) > sizeof(record))
+            buflen = (sizeof(record) - 1) - (strlen(record) + 1);
+         else
+            buflen = strlen(curr->value);
+         memcpy(record+strlen(record)+1, curr->value, buflen);
+         fwrite(record, sizeof(record), 1, fp);
+         curr = curr->next;
       }
    }
 }

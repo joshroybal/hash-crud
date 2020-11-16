@@ -26,9 +26,10 @@ int main(int argc, char *argv[])
       }
    }
    else {
-      if ((fp = fopen("/mnt/data/table.dat", "rb")) != (FILE *) NULL)
+      if ((fp = fopen("/mnt/data/table.dat", "rb")) != (FILE *) NULL) {
          read_table(&table, fp);
          fclose(fp);
+      }
    }
 
    while ((ans = printmenu()) != 'E') {
