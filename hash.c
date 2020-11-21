@@ -216,17 +216,22 @@ void write_table(const struct hash_table *t, FILE *fp)
 
    for (i = 0; i < t->n; ++i) {
       curr = t->buckets[i];
-      while (curr) {
-         memset(record, 0, sizeof(record));
-         memcpy(record, curr->key, strlen(curr->key));
-         if (strlen(record)+1+strlen(curr->value) > sizeof(record))
-            buflen = (sizeof(record) - 1) - (strlen(record) + 1);
-         else
-            buflen = strlen(curr->value);
-         memcpy(record+strlen(record)+1, curr->value, buflen);
-         fwrite(record, sizeof(record), 1, fp);
-         curr = curr->next;
-      }
+      if (curr) {
+         while (curr) {
+            memset(record, 0, sizeof(record));
+            if (strlen(curr->key)+strlen(curr->value)+2 < sizeof(record)) {
+               memcpy(record, curr->key, strlen(curr->key));
+               memcpy(record+strlen(record)+1, curr->value, strlen(curr->value));
+               fwrite(record, sizeof(record), 1, fp);
+            }
+            else {
+               printf("record too long - not written to file\n");
+               printf("key: %s\n", curr->key);
+               printf("value: %s\n", curr->value);
+            }
+            curr = curr->next;
+         }
+      }      
    }
 }
 
