@@ -1,0 +1,2 @@
+#!/bin/sh
+cp table.tab table.old ; ./crud

@@ -1,16 +1,18 @@
-CC = clang
-CFLAGS = -ansi -pedantic-errors -g
-LFLAGS =
+CFLAGS = -ansi -pedantic-errors -Wall -Wextra -Werror -O2
+LFLAGS = -lm -static -s
+SRC = $(wildcard *.c)
+OBJ = $(SRC:.c=.o)
+DEP = $(SRC:.c=.d)
+BIN = crud
 
-crud: main.o hash.o
-	$(CC) $(LFLAGS) $^ -o $@
+$(BIN): $(OBJ)
+	$(CC) -o $@ $^ $(LFLAGS)
 
-main.o: main.c hash.h
-	$(CC) $(CFLAGS) $< -c
-
-hash.o: hash.c hash.h
-	$(CC) $(CFLAGS) $< -c
+%.o: %.c
+	$(CC) -MMD -MP -c $< $(CFLAGS)
 
 .PHONY : clean
 clean:
-	$(RM) crud *.o *~
+	$(RM) $(BIN) $(OBJ) $(DEP) *~
+
+-include $(DEP)
